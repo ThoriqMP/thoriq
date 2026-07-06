@@ -146,6 +146,36 @@ class TreasuryController extends Controller
         return redirect()->back()->with('success', 'Omset berhasil disetujui dan alokasi dana dibuat!');
     }
 
+    public function destroyOmset($id)
+    {
+        $this->checkAccess(['Treasury', 'Head']);
+
+        $log = OmsetLog::findOrFail($id);
+
+        \DB::transaction(function () use ($log) {
+            if ($log->status === 'approved') {
+                $formattedPerusahaan = number_format($log->alokasi_perusahaan, 0, ',', '.');
+                $formattedGaji = number_format($log->alokasi_gaji, 0, ',', '.');
+
+                // Cari transaksi kas masuk yang sesuai untuk dihapus agar kas perusahaan kembali seimbang
+                CashTransaction::where('kategori', 'omset')
+                    ->where('tipe', 'in')
+                    ->where('nominal', $log->nominal_omset)
+                    ->where(function($query) use ($formattedPerusahaan, $formattedGaji) {
+                        $query->where('deskripsi', 'like', "%Alokasi Perusahaan (Rp {$formattedPerusahaan})%")
+                              ->orWhere('deskripsi', 'like', "%Alokasi Gaji (Rp {$formattedGaji})%");
+                    })
+                    ->first()
+                    ?->delete();
+            }
+
+            // Hapus log omset
+            $log->delete();
+        });
+
+        return redirect()->back()->with('success', 'Data omset berhasil dihapus dan alokasi kas dibatalkan!');
+    }
+
     private function generatePayrollDistributions(OmsetLog $log)
     {
         $users = User::all(); // 7 users

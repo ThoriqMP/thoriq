@@ -233,4 +233,56 @@ class TreasuryPayrollHubTest extends TestCase
             'nominal' => 4200000,
         ]);
     }
+
+    public function test_treasury_can_delete_omset_and_rollback_cash_ledger()
+    {
+        $this->actingAs($this->treasury);
+
+        // 1. Tambah data omset log
+        $log = OmsetLog::create([
+            'tanggal' => '2026-07-06',
+            'nominal_omset' => 100000000, // A
+            'alokasi_gaji' => 70000000, // B (70% A)
+            'alokasi_perusahaan' => 30000000, // C (30% A)
+            'gaji_pokok_pool' => 49000000, // D (70% B)
+            'tukin_pool' => 21000000, // E (30% B)
+            'sales_id' => $this->sales->id,
+            'status' => 'approved',
+        ]);
+
+        // Simpan transaksi kas masuk yang dihasilkan
+        CashTransaction::create([
+            'tipe' => 'in',
+            'kategori' => 'omset',
+            'nominal' => 100000000,
+            'deskripsi' => "Omset Masuk - Alokasi Perusahaan (Rp " . number_format(30000000, 0, ',', '.') . ") & Alokasi Gaji (Rp " . number_format(70000000, 0, ',', '.') . ")",
+        ]);
+
+        // Generate distributions
+        $users = User::all();
+        foreach ($users as $user) {
+            PayrollDistribution::create([
+                'omset_log_id' => $log->id,
+                'user_id' => $user->id,
+                'kpi_grade_id' => null,
+                'nominal_gapok_diterima' => 7000000,
+                'nominal_tukin_diterima' => 0,
+                'status_pembayaran' => 'pending',
+            ]);
+        }
+
+        // Pastikan data awal ada
+        $this->assertDatabaseHas('omset_logs', ['id' => $log->id]);
+        $this->assertDatabaseHas('cash_transactions', ['kategori' => 'omset', 'nominal' => 100000000]);
+        $this->assertDatabaseCount('payroll_distributions', 7);
+
+        // 2. Kirim request Delete Omset
+        $response = $this->delete(route('treasury.omset.destroy', $log->id));
+        $response->assertRedirect();
+
+        // 3. Verifikasi data terhapus & kas dibatalkan
+        $this->assertDatabaseMissing('omset_logs', ['id' => $log->id]);
+        $this->assertDatabaseMissing('cash_transactions', ['kategori' => 'omset', 'nominal' => 100000000]);
+        $this->assertDatabaseCount('payroll_distributions', 0); // cascade delete bekerja
+    }
 }

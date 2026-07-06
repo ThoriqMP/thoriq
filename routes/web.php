@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/omset', [\App\Http\Controllers\TreasuryController::class, 'inputOmset'])->name('omset');
         Route::post('/omset', [\App\Http\Controllers\TreasuryController::class, 'storeOmset'])->name('omset.store');
         Route::post('/omset/{id}/approve', [\App\Http\Controllers\TreasuryController::class, 'approveOmset'])->name('omset.approve');
+        Route::delete('/omset/{id}', [\App\Http\Controllers\TreasuryController::class, 'destroyOmset'])->name('omset.destroy');
         
         Route::get('/payroll', [\App\Http\Controllers\TreasuryController::class, 'evaluasiPayroll'])->name('payroll');
         Route::post('/payroll/{id}/kpi', [\App\Http\Controllers\TreasuryController::class, 'updateKpi'])->name('payroll.kpi');

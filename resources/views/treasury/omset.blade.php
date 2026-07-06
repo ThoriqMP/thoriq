@@ -61,16 +61,21 @@
                                         {{ $log->status === 'approved' ? 'Approved' : 'Pending' }}
                                     </span>
                                 </td>
-                                <td class="p-4 text-center">
+                                <td class="p-4 text-center flex items-center justify-center gap-2">
                                     @if($log->status === 'pending' && Auth::user()->hasRole(['Treasury', 'Head']))
                                         <form action="{{ route('treasury.omset.approve', $log->id) }}" method="POST" class="inline">
                                             @csrf
-                                            <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-555 text-white text-[10px] font-bold rounded-lg transition cursor-pointer">
+                                            <button type="submit" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-555 text-white text-[10px] font-bold rounded-lg transition cursor-pointer">
                                                 Approve
                                             </button>
                                         </form>
-                                    @else
-                                        <span class="text-slate-500 font-semibold">-</span>
+                                    @endif
+                                    @if(Auth::user()->hasRole(['Treasury', 'Head']))
+                                        <button type="button" onclick="confirmDeleteOmset('{{ route('treasury.omset.destroy', $log->id) }}')" class="p-1.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg transition cursor-pointer" title="Hapus Omset">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                     @endif
                                 </td>
                             </tr>
@@ -104,14 +109,23 @@
                                 <div class="text-[10px] text-slate-500 mt-1 truncate">PIC: {{ $log->sales->name }}</div>
                             </div>
 
-                            @if($log->status === 'pending' && Auth::user()->hasRole(['Treasury', 'Head']))
-                                <form action="{{ route('treasury.omset.approve', $log->id) }}" method="POST" class="w-full">
-                                    @csrf
-                                    <button type="submit" class="w-full text-center py-1.5 bg-emerald-600 hover:bg-emerald-555 text-white text-[10px] font-bold rounded-lg transition cursor-pointer">
-                                        Approve
+                            <div class="flex gap-2 w-full">
+                                @if($log->status === 'pending' && Auth::user()->hasRole(['Treasury', 'Head']))
+                                    <form action="{{ route('treasury.omset.approve', $log->id) }}" method="POST" class="flex-grow">
+                                        @csrf
+                                        <button type="submit" class="w-full text-center py-1.5 bg-emerald-600 hover:bg-emerald-555 text-white text-[10px] font-bold rounded-lg transition cursor-pointer">
+                                            Approve
+                                        </button>
+                                    </form>
+                                @endif
+                                @if(Auth::user()->hasRole(['Treasury', 'Head']))
+                                    <button type="button" onclick="confirmDeleteOmset('{{ route('treasury.omset.destroy', $log->id) }}')" class="px-2 py-1.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg transition cursor-pointer flex items-center justify-center shrink-0" title="Hapus">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
                                     </button>
-                                </form>
-                            @endif
+                                @endif
+                            </div>
                         </div>
                     @empty
                         <div class="col-span-2 text-center py-12 text-slate-500 text-xs">Belum ada pengajuan omset.</div>
@@ -225,4 +239,33 @@
             </form>
         </div>
     </div>
+    <!-- Modal Konfirmasi Hapus Omset Global -->
+    <div id="modal-delete-confirm" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm hidden">
+        <div class="bg-slate-900 border border-white/5 rounded-2xl w-full max-w-sm p-6 space-y-6">
+            <div class="text-center space-y-3">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-rose-500/10 text-rose-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-white">Konfirmasi Hapus Omset</h3>
+                <p class="text-xs text-slate-400">Apakah Anda yakin ingin menghapus data omset ini? Tindakan ini akan menghapus alokasi kas masuk dan seluruh data payroll terkait secara permanen.</p>
+            </div>
+            
+            <form id="form-delete-confirm" method="POST" class="flex gap-3 justify-center">
+                @csrf
+                @method('DELETE')
+                <button type="button" onclick="document.getElementById('modal-delete-confirm').classList.add('hidden')" class="px-4 py-2.5 bg-white/5 text-slate-350 hover:bg-white/10 hover:text-white rounded-xl text-xs font-semibold cursor-pointer">Batal</button>
+                <button type="submit" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold cursor-pointer">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function confirmDeleteOmset(actionUrl) {
+            const form = document.getElementById('form-delete-confirm');
+            form.action = actionUrl;
+            document.getElementById('modal-delete-confirm').classList.remove('hidden');
+        }
+    </script>
 </x-app-layout>

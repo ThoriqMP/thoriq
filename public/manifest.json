@@ -1,0 +1,51 @@
+{
+    "name": "Thoriq Workspace",
+    "short_name": "ThoriqWS",
+    "description": "Aplikasi manajemen workspace terpadu - tugas, treasury, payroll, dan pengeluaran event.",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#020617",
+    "theme_color": "#4f46e5",
+    "lang": "id",
+    "categories": ["productivity", "business", "finance"],
+    "icons": [
+        {
+            "src": "/pwa-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/pwa-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [],
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "short_name": "Beranda",
+            "description": "Buka halaman utama Thoriq Workspace",
+            "url": "/dashboard",
+            "icons": [{ "src": "/pwa-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Buku Kas",
+            "short_name": "Kas",
+            "description": "Pantau saldo dan riwayat transaksi kas",
+            "url": "/treasury/cashbook",
+            "icons": [{ "src": "/pwa-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Pengeluaran Event",
+            "short_name": "Event",
+            "description": "Kelola anggaran dan pengeluaran event",
+            "url": "/treasury/events",
+            "icons": [{ "src": "/pwa-192.png", "sizes": "192x192" }]
+        }
+    ]
+}

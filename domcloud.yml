@@ -50,8 +50,4 @@ commands:
   - php artisan route:cache
   - php artisan view:cache
   
-  # Install & Compile Asset Frontend (Vite)
-  - npm install
-  - npm run build
-  
   - echo "Deployment completed successfully! Thoriq Workspace is ready."

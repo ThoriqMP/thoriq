@@ -1,0 +1,57 @@
+# DOM Cloud Deployment Configuration for Laravel 11 (Thoriq Workspace)
+# Tempatkan file ini di root folder proyek Anda.
+
+# 1. Konfigurasi Root Direktori Nginx agar mengarah ke folder public Laravel
+root: public_html/public
+
+# 2. Konfigurasi Nginx untuk PHP FastCGI dan routing Laravel (agar tidak error 404 pada route selain /)
+nginx:
+  fastcgi: "on"
+  locations:
+    - match: /
+      try_files: $uri $uri/ /index.php$is_args$args
+
+# 3. Fitur Server yang dibutuhkan
+features:
+  - php latest
+  - mysql
+  - ssl
+  - websocket
+
+# 4. Perintah Otomatisasi Deployment saat Push/Deploy
+commands:
+  - echo "Starting deployment steps..."
+  
+  # Copy berkas environment jika belum ada
+  - test -f .env || cp .env.example .env
+  
+  # Konfigurasi otomatis Database DOM Cloud ke file .env
+  - sed -ri "s/(# )?DB_CONNECTION=.*/DB_CONNECTION=mysql/g" .env
+  - sed -ri "s/(# )?DB_DATABASE=.*/DB_DATABASE=${DATABASE}/g" .env
+  - sed -ri "s/(# )?DB_USERNAME=.*/DB_USERNAME=${USERNAME}/g" .env
+  - sed -ri "s/(# )?DB_PASSWORD=.*/DB_PASSWORD=${PASSWORD}/g" .env
+  - sed -ri "s/(# )?APP_ENV=.*/APP_ENV=production/g" .env
+  - sed -ri "s/(# )?APP_DEBUG=.*/APP_DEBUG=false/g" .env
+  
+  # Install Composer Dependencies (Optimized for Production)
+  - composer install --no-dev --optimize-autoloader --no-interaction
+  
+  # Generate Application Key jika belum terisi
+  - php artisan key:generate --force
+  
+  # Jalankan migrasi database dan masukkan data dummy awal (Seeder 7 User wajib)
+  - php artisan migrate:fresh --seed --force
+  
+  # Buat symlink storage agar file dokumen / unggahan bisa diakses publik
+  - php artisan storage:link
+  
+  # Optimalisasi cache Laravel untuk performa maksimal di server gratis
+  - php artisan config:cache
+  - php artisan route:cache
+  - php artisan view:cache
+  
+  # Install & Compile Asset Frontend (Vite)
+  - npm install
+  - npm run build
+  
+  - echo "Deployment completed successfully! Thoriq Workspace is ready."

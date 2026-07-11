@@ -201,9 +201,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-450 uppercase mb-2">Sales PIC</label>
+                    <label class="block text-xs font-bold text-slate-450 uppercase mb-2">Marketing PIC</label>
                     <select name="sales_id" class="w-full bg-slate-950 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
-                        @foreach($salesUsers as $su)
+                        @foreach($marketingUsers as $su)
                             <option value="{{ $su->id }}" {{ $su->id === Auth::id() ? 'selected' : '' }}>{{ $su->name }}</option>
                         @endforeach
                     </select>

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Thoriq Workspace') }}</title>
+        <title>{{ config('app.name', 'Team Psikomapping') }}</title>
 
         <!-- PWA Manifest & Meta -->
         <link rel="manifest" href="/manifest.json">
@@ -13,7 +13,7 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="ThoriqWS">
+        <meta name="apple-mobile-web-app-title" content="Psikomapping">
         <link rel="apple-touch-icon" href="/pwa-apple-touch.png">
 
         <!-- Fonts -->
@@ -74,7 +74,7 @@
         <!-- PWA Update Banner (shown when a new version is available) -->
         <div id="pwa-update-banner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[200] hidden animate-in">
             <div class="bg-indigo-600 text-white text-xs font-semibold px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4">
-                <span>✨ Pembaruan Thoriq Workspace tersedia!</span>
+                <span>✨ Pembaruan Team Psikomapping tersedia!</span>
                 <button onclick="window.pwaApplyUpdate()" class="px-3 py-1 bg-white text-indigo-700 rounded-lg text-[11px] font-bold cursor-pointer hover:bg-indigo-100 transition">
                     Perbarui Sekarang
                 </button>
@@ -118,13 +118,10 @@
                 <header class="sticky top-0 z-40 md:hidden flex items-center justify-between px-6 h-16 bg-slate-950/80 border-b border-white/5 backdrop-blur-md">
                     <!-- Mobile Brand Logo -->
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-md shadow-indigo-500/10">
-                            <svg class="h-full w-full text-white" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M24 6L8 13.5v11.5c0 10.5 7.5 20.3 16 23 8.5-2.7 16-12.5 16-23V13.5L24 6z" fill="white" fill-opacity="0.1" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-                                <path d="M17 24l5 5 9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                        <div class="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden shadow-md shadow-indigo-500/10 shrink-0">
+                            <img src="/Logo.png" alt="Logo Team Psikomapping" class="h-full w-full object-cover">
                         </div>
-                        <span class="text-sm font-bold tracking-tight text-white">Thoriq Workspace</span>
+                        <span class="text-sm font-bold tracking-tight text-white">Team Psikomapping</span>
                     </a>
                     
                     <!-- Menu Toggle -->
@@ -153,7 +150,7 @@
                 <footer class="border-t border-white/5 bg-slate-950/40 py-6 mt-12 relative z-10">
                     <div class="px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-650 font-semibold">
                         <div>
-                            &copy; 2026 Thoriq Workspace. All rights reserved.
+                            &copy; 2026 Team Psikomapping. All rights reserved.
                         </div>
                         <div class="flex items-center gap-2">
                             <span>Workspace Version v1.0.0</span>

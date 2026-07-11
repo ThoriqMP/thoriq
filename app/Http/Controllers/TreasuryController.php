@@ -13,6 +13,7 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TreasuryController extends Controller
 {
@@ -25,7 +26,7 @@ class TreasuryController extends Controller
 
     public function dashboard()
     {
-        $this->checkAccess(['Treasury', 'Head']);
+        $this->checkAccess(['Treasury', 'Headman']);
 
         // Cash flow calculations
         $totalIn = CashTransaction::where('tipe', 'in')->sum('nominal');
@@ -56,19 +57,19 @@ class TreasuryController extends Controller
 
     public function inputOmset()
     {
-        $this->checkAccess(['Treasury', 'Sales', 'Head']);
+        $this->checkAccess(['Treasury', 'Marketing', 'Headman']);
 
         $omsetLogs = OmsetLog::with('sales')->latest()->paginate(10);
-        $salesUsers = User::whereHas('role', function($q) {
-            $q->where('name', 'Sales');
+        $marketingUsers = User::whereHas('role', function($q) {
+            $q->where('name', 'Marketing');
         })->get();
 
-        return view('treasury.omset', compact('omsetLogs', 'salesUsers'));
+        return view('treasury.omset', compact('omsetLogs', 'marketingUsers'));
     }
 
     public function storeOmset(Request $request)
     {
-        $this->checkAccess(['Treasury', 'Sales']);
+        $this->checkAccess(['Treasury', 'Marketing', 'Headman']);
 
         $request->validate([
             'tanggal' => 'required|date',
@@ -89,7 +90,7 @@ class TreasuryController extends Controller
         $gapokPool = $alokasiGaji * 0.70;
         $tukinPool = $alokasiGaji * 0.30;
 
-        // Auto approve if entered by Treasury, else wait for Treasury/Head approval
+        // Auto approve if entered by Treasury, else wait for Treasury/Headman approval
         $status = (Auth::user()->role && Auth::user()->role->name === 'Treasury') ? 'approved' : 'pending';
 
         \DB::transaction(function () use ($request, $omset, $alokasiGaji, $alokasiPerusahaan, $gapokPool, $tukinPool, $status) {
@@ -118,12 +119,28 @@ class TreasuryController extends Controller
             }
         });
 
+        // Send notifications to Treasury & Headman if submitted by non-Treasury
+        if ($status === 'pending') {
+            $submitterName = Auth::user()->name;
+            $treasuryAndHeadmen = User::whereHas('role', function ($q) {
+                $q->whereIn('name', ['Treasury', 'Headman']);
+            })->where('id', '!=', Auth::id())->get();
+
+            NotificationController::send(
+                $treasuryAndHeadmen->pluck('id')->toArray(),
+                'omset_submitted',
+                'Pengajuan Omset Baru',
+                "{$submitterName} mengajukan omset baru yang memerlukan persetujuan Anda.",
+                route('treasury.omset')
+            );
+        }
+
         return redirect()->back()->with('success', 'Data omset berhasil diinput!');
     }
 
     public function approveOmset($id)
     {
-        $this->checkAccess(['Treasury', 'Head']);
+        $this->checkAccess(['Treasury', 'Headman']);
 
         $log = OmsetLog::findOrFail($id);
 
@@ -143,12 +160,24 @@ class TreasuryController extends Controller
             });
         }
 
+        // Notify the original submitter (sales user)
+        if ($log->sales_id) {
+            $approverName = Auth::user()->name;
+            NotificationController::send(
+                $log->sales_id,
+                'omset_approved',
+                'Pengajuan Omset Disetujui ✅',
+                "{$approverName} telah menyetujui pengajuan omset Anda tanggal " . \Carbon\Carbon::parse($log->tanggal)->format('d M Y') . ". Payroll telah dibuat.",
+                route('treasury.omset')
+            );
+        }
+
         return redirect()->back()->with('success', 'Omset berhasil disetujui dan alokasi dana dibuat!');
     }
 
     public function destroyOmset($id)
     {
-        $this->checkAccess(['Treasury', 'Head']);
+        $this->checkAccess(['Treasury', 'Headman']);
 
         $log = OmsetLog::findOrFail($id);
 
@@ -198,7 +227,7 @@ class TreasuryController extends Controller
 
     public function evaluasiPayroll(Request $request)
     {
-        $this->checkAccess(['Treasury', 'Head']);
+        $this->checkAccess(['Treasury', 'Headman']);
 
         // Get omset logs that have distributions
         $omsetLogs = OmsetLog::where('status', 'approved')->latest()->get();
@@ -279,8 +308,7 @@ class TreasuryController extends Controller
 
     public function events()
     {
-        $this->checkAccess(['Treasury', 'Head', 'Sales', 'Developer']);
-
+        // All roles can view events
         $events = Event::with(['pic', 'expenses'])->latest()->paginate(10);
         $users = User::all();
 
@@ -359,7 +387,7 @@ class TreasuryController extends Controller
 
     public function cashBook()
     {
-        $this->checkAccess(['Treasury', 'Head']);
+        $this->checkAccess(['Treasury', 'Headman', 'Penasehat']);
 
         $transactions = CashTransaction::latest()->paginate(15);
         
@@ -388,7 +416,7 @@ class TreasuryController extends Controller
 
     public function users()
     {
-        $this->checkAccess(['Treasury', 'Head']);
+        $this->checkAccess(['Treasury']);
 
         $users = User::with('role')->get();
         $roles = Role::all();

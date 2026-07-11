@@ -93,6 +93,96 @@
             </div>
 
         </div>
+
+        {{-- =====================================================
+             TASK DETAIL SIDE PANEL (Assignment + Comments)
+        ===================================================== --}}
+        <div id="taskDetailPanel"
+             class="hidden fixed inset-0 z-50 flex items-start justify-end"
+             onclick="closeTaskDetail(event)"
+        >
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"></div>
+
+            <!-- Sliding Panel -->
+            <div id="taskDetailContent"
+                 class="relative w-full max-w-md h-full bg-slate-950 border-l border-white/5 shadow-2xl overflow-y-auto flex flex-col"
+                 onclick="event.stopPropagation()"
+            >
+                <!-- Panel Header -->
+                <div class="sticky top-0 z-10 px-6 py-4 border-b border-white/5 bg-slate-950/90 backdrop-blur-sm flex justify-between items-start">
+                    <div>
+                        <span id="detailPriority" class="text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full border mb-1 inline-block"></span>
+                        <h3 id="detailTitle" class="font-bold text-base text-white leading-snug"></h3>
+                        <p id="detailProject" class="text-xs text-slate-500 mt-0.5"></p>
+                    </div>
+                    <button onclick="closeTaskDetail()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition cursor-pointer mt-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Description -->
+                <div class="px-6 py-4 border-b border-white/5">
+                    <p id="detailDescription" class="text-sm text-slate-400 leading-relaxed"></p>
+                </div>
+
+                <!-- Assignees Section -->
+                <div class="px-6 py-5 border-b border-white/5">
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
+                        👥 Anggota Ditugaskan
+                    </h4>
+                    <!-- Current Assignees -->
+                    <div id="detailAssignees" class="space-y-2 mb-4"></div>
+
+                    <!-- Assign Form -->
+                    <form id="assignForm" method="POST" class="flex gap-2">
+                        @csrf
+                        <select name="user_id" id="assignUserSelect"
+                            class="flex-1 text-xs bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20">
+                            <option value="">Pilih anggota...</option>
+                            @foreach($allUsers as $u)
+                                <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->role?->name ?? '-' }})</option>
+                            @endforeach
+                        </select>
+                        <button type="submit"
+                            class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition cursor-pointer whitespace-nowrap">
+                            + Tugaskan
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="px-6 py-5 flex-1">
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">
+                        💬 Komentar
+                    </h4>
+
+                    <!-- Comment List -->
+                    <div id="detailComments" class="space-y-4 mb-5"></div>
+
+                    <!-- Comment Form -->
+                    <form id="commentForm" method="POST" class="space-y-2">
+                        @csrf
+                        <div class="flex gap-2.5 items-start">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-0.5">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <textarea name="body" id="commentBody" rows="2"
+                                    class="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 resize-none"
+                                    placeholder="Tulis komentar..."></textarea>
+                                <button type="submit"
+                                    class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                                    Kirim Komentar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Task Action Modal (Create & Edit) -->
@@ -390,6 +480,128 @@
                 form.action = `/tasks/${taskId}`;
                 form.submit();
             }
+        }
+
+        // ================================================================
+        // TASK DETAIL PANEL — Assignment & Comments
+        // ================================================================
+        const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // All task data injected by Laravel (for client-side panel rendering)
+        const allTasksData = @json(array_merge(
+            $todoTasks->toArray(),
+            $inProgressTasks->toArray(),
+            $doneTasks->toArray()
+        ));
+
+        let currentTaskId = null;
+
+        function openTaskDetail(taskId) {
+            const task = allTasksData.find(t => t.id === taskId);
+            if (!task) return;
+            currentTaskId = taskId;
+
+            // Priority badge
+            const prioEl = document.getElementById('detailPriority');
+            const prioColors = {
+                high: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+                medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+            };
+            prioEl.className = `text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full border mb-1 inline-block ${prioColors[task.priority] || ''}`;
+            prioEl.textContent = task.priority;
+
+            document.getElementById('detailTitle').textContent = task.title;
+            document.getElementById('detailProject').textContent = '{{ $project->name }}';
+            document.getElementById('detailDescription').textContent = task.description || 'Tidak ada deskripsi.';
+
+            // Render assignees
+            renderAssignees(task.assignees || []);
+
+            // Render comments
+            renderComments(task.comments || []);
+
+            // Wire assign form
+            const assignForm = document.getElementById('assignForm');
+            assignForm.action = `/tasks/${taskId}/assign`;
+
+            // Wire comment form
+            const commentForm = document.getElementById('commentForm');
+            commentForm.action = `/tasks/${taskId}/comments`;
+
+            // Show panel
+            document.getElementById('taskDetailPanel').classList.remove('hidden');
+        }
+
+        function closeTaskDetail(event) {
+            if (event && event.target !== document.getElementById('taskDetailPanel')) return;
+            document.getElementById('taskDetailPanel').classList.add('hidden');
+            currentTaskId = null;
+        }
+
+        function renderAssignees(assignees) {
+            const el = document.getElementById('detailAssignees');
+            if (!assignees || assignees.length === 0) {
+                el.innerHTML = '<p class="text-xs text-slate-600 italic">Belum ada anggota yang ditugaskan.</p>';
+                return;
+            }
+            el.innerHTML = assignees.map(a => `
+                <div class="flex items-center justify-between py-1.5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                            ${(a.name || '??').substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-200">${a.name}</p>
+                            <p class="text-[10px] text-slate-500">${a.role?.name ?? 'No Role'}</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="/tasks/${currentTaskId}/unassign/${a.id}">
+                        <input type="hidden" name="_token" value="${CSRF}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="text-[10px] text-slate-600 hover:text-rose-400 transition cursor-pointer px-2 py-1 hover:bg-rose-500/5 rounded-lg">
+                            Hapus
+                        </button>
+                    </form>
+                </div>
+            `).join('');
+        }
+
+        function renderComments(comments) {
+            const el = document.getElementById('detailComments');
+            if (!comments || comments.length === 0) {
+                el.innerHTML = '<p class="text-xs text-slate-600 italic">Belum ada komentar. Jadilah yang pertama!</p>';
+                return;
+            }
+            el.innerHTML = comments.map(c => `
+                <div class="flex gap-2.5 items-start">
+                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-0.5 border border-white/5">
+                        ${(c.user?.name || '??').substring(0, 2).toUpperCase()}
+                    </div>
+                    <div class="flex-1 bg-slate-900/60 rounded-xl border border-white/5 px-3 py-2.5">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[11px] font-bold text-slate-200">${c.user?.name ?? 'Unknown'}</span>
+                                <span class="text-[9px] px-1.5 py-0.5 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/10 font-bold">
+                                    ${c.user?.role?.name ?? ''}
+                                </span>
+                            </div>
+                            <span class="text-[10px] text-slate-600">${formatDate(c.created_at)}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">${escapeHtml(c.body)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function escapeHtml(text) {
+            return (text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>');
         }
     </script>
 </x-app-layout>

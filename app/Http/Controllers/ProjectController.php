@@ -31,14 +31,17 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $projects = Project::all(); // for project switcher
+        $projects  = Project::all(); // for project switcher
         $documents = \App\Models\Document::all(); // for task attachments
+        $allUsers  = \App\Models\User::with('role')->get(); // for task assignment
         
-        $todoTasks = $project->tasks()->with('documents')->where('status', 'todo')->orderBy('position')->get();
-        $inProgressTasks = $project->tasks()->with('documents')->where('status', 'in_progress')->orderBy('position')->get();
-        $doneTasks = $project->tasks()->with('documents')->where('status', 'done')->orderBy('position')->get();
+        $taskWith = ['documents', 'assignees.role', 'comments.user.role'];
 
-        return view('projects.show', compact('project', 'projects', 'documents', 'todoTasks', 'inProgressTasks', 'doneTasks'));
+        $todoTasks       = $project->tasks()->with($taskWith)->where('status', 'todo')->orderBy('position')->get();
+        $inProgressTasks = $project->tasks()->with($taskWith)->where('status', 'in_progress')->orderBy('position')->get();
+        $doneTasks       = $project->tasks()->with($taskWith)->where('status', 'done')->orderBy('position')->get();
+
+        return view('projects.show', compact('project', 'projects', 'documents', 'todoTasks', 'inProgressTasks', 'doneTasks', 'allUsers'));
     }
 
     public function update(Request $request, Project $project)

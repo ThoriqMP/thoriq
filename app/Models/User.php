@@ -46,6 +46,11 @@ class User extends Authenticatable
         return $this->role->name === $roles;
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('Treasury');
+    }
+
     public function payrollDistributions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(PayrollDistribution::class);
@@ -55,4 +60,27 @@ class User extends Authenticatable
     {
         return $this->hasMany(Event::class, 'pic_id');
     }
+
+    public function taskComments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TaskComment::class);
+    }
+
+    public function assignedTasks(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Task::class, 'task_assignments', 'assigned_to', 'task_id')
+                    ->withPivot('assigned_by')
+                    ->withTimestamps();
+    }
+
+    public function appNotifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Notification::class)->latest();
+    }
+
+    public function unreadNotificationsCount(): int
+    {
+        return $this->hasMany(Notification::class)->whereNull('read_at')->count();
+    }
 }
+

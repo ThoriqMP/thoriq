@@ -3,14 +3,11 @@
     <div class="flex flex-col flex-grow">
         <!-- Brand / Logo Header -->
         <div class="p-6 border-b border-white/5 flex items-center gap-2.5">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-md shadow-indigo-500/10">
-                <svg class="h-full w-full text-white" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M24 6L8 13.5v11.5c0 10.5 7.5 20.3 16 23 8.5-2.7 16-12.5 16-23V13.5L24 6z" fill="white" fill-opacity="0.1" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M17 24l5 5 9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-md shadow-indigo-500/10 shrink-0">
+                <img src="/Logo.png" alt="Logo" class="h-full w-full object-cover">
             </div>
             <span class="text-base font-bold tracking-tight bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
-                Thoriq Workspace
+                Team Psikomapping
             </span>
         </div>
 
@@ -23,11 +20,12 @@
                 <span>Dashboard</span>
             </x-nav-link>
 
+            <!-- Workspace — All Roles -->
             <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                <span>Proyek & Tugas</span>
+                <span>Workspace Tasks</span>
             </x-nav-link>
 
             <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">
@@ -45,7 +43,23 @@
                 <span>Compress PDF</span>
             </x-nav-link>
 
-            @if(Auth::user()->hasRole(['Treasury', 'Sales', 'Head']))
+            <!-- Notifications (all roles) -->
+            <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.*')">
+                <div class="relative shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    @php $unreadCount = Auth::user()->unreadNotificationsCount(); @endphp
+                    @if($unreadCount > 0)
+                        <span class="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white">
+                            {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                        </span>
+                    @endif
+                </div>
+                <span>Notifikasi</span>
+            </x-nav-link>
+
+            @if(Auth::user()->hasRole(['Treasury', 'Headman', 'Marketing', 'Penasehat']))
                 <!-- Treasury & Payroll Hub Accordion Menu -->
                 <div x-data="{ open: {{ request()->routeIs('treasury.*') ? 'true' : 'false' }} }" class="space-y-1">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer {{ request()->routeIs('treasury.*') ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent' }}">
@@ -61,38 +75,63 @@
                     </button>
                     
                     <div x-show="open" x-collapse class="pl-6 space-y-1 mt-1" style="display: none;">
-                        @if(Auth::user()->hasRole(['Treasury', 'Head']))
+                        @if(Auth::user()->hasRole(['Treasury', 'Headman']))
                             <a href="{{ route('treasury.dashboard') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.dashboard') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
                                 Dashboard Keuangan
                             </a>
                         @endif
-                        <a href="{{ route('treasury.omset') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.omset') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
-                            Input Omset & Sales
-                        </a>
-                        @if(Auth::user()->hasRole(['Treasury', 'Head']))
+
+                        @if(Auth::user()->hasRole(['Treasury', 'Marketing', 'Headman']))
+                            <a href="{{ route('treasury.omset') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.omset') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
+                                {{ Auth::user()->hasRole(['Marketing']) ? 'Ajukan Omset' : 'Omset & Persetujuan' }}
+                            </a>
+                        @endif
+
+                        @if(Auth::user()->hasRole(['Treasury', 'Headman', 'Penasehat']))
                             <a href="{{ route('treasury.payroll') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.payroll') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
                                 Evaluasi KPI & Payroll
                             </a>
-                        @endif
-                        <a href="{{ route('treasury.events') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.events') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
-                            Pengeluaran Event
-                        </a>
-                        @if(Auth::user()->hasRole(['Treasury', 'Head']))
                             <a href="{{ route('treasury.cashbook') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.cashbook') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
                                 Buku Kas Besar
                             </a>
+                        @endif
+
+                        <a href="{{ route('treasury.events') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.events') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
+                            Pengeluaran Event
+                        </a>
+
+                        @if(Auth::user()->hasRole(['Treasury']))
                             <a href="{{ route('treasury.users') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.users') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}">
-                                Manajemen Pengguna & Peran
+                                👑 Manajemen Pengguna
                             </a>
                         @endif
                     </div>
                 </div>
+            @endif
+
+            <!-- Events visible to all roles -->
+            @if(!Auth::user()->hasRole(['Treasury', 'Headman', 'Marketing', 'Penasehat']))
+                <x-nav-link :href="route('treasury.events')" :active="request()->routeIs('treasury.events')">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    <span>Jadwal Event</span>
+                </x-nav-link>
             @endif
         </div>
     </div>
 
     <!-- Desktop Sidebar Footer / User Info & Actions Direct -->
     <div class="p-4 border-t border-white/5 space-y-3">
+        <!-- Role Badge -->
+        @if(Auth::user()->role)
+            <div class="px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/10 text-center">
+                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
+                    {{ Auth::user()->role->name }}
+                </span>
+            </div>
+        @endif
+
         <!-- User Info Row -->
         <div class="flex items-center gap-3 p-1">
             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-md shadow-indigo-500/10">
@@ -157,14 +196,20 @@
 
         <!-- Brand / Logo Header -->
         <div class="flex items-center gap-2.5">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-md shadow-indigo-500/10">
-                <svg class="h-full w-full text-white" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M24 6L8 13.5v11.5c0 10.5 7.5 20.3 16 23 8.5-2.7 16-12.5 16-23V13.5L24 6z" fill="white" fill-opacity="0.1" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M17 24l5 5 9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-md shadow-indigo-500/10 shrink-0">
+                <img src="/Logo.png" alt="Logo" class="h-full w-full object-cover">
             </div>
-            <span class="text-base font-bold tracking-tight text-white">Thoriq Workspace</span>
+            <span class="text-base font-bold tracking-tight text-white">Team Psikomapping</span>
         </div>
+
+        <!-- Role Badge Mobile -->
+        @if(Auth::user()->role)
+            <div class="px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/10 text-center -mt-2">
+                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
+                    {{ Auth::user()->role->name }}
+                </span>
+            </div>
+        @endif
 
         <!-- Mobile Navigation Menu Links -->
         <div class="flex-grow py-4 space-y-1.5 overflow-y-auto" @click="sidebarOpen = false">
@@ -179,7 +224,7 @@
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                <span>Proyek & Tugas</span>
+                <span>Workspace Tasks</span>
             </x-nav-link>
 
             <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">
@@ -192,12 +237,27 @@
             <x-nav-link :href="route('pdf-compress.index')" :active="request()->routeIs('pdf-compress.*')">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4-4m0 0l4 4m-4-4v9"/>
                 </svg>
                 <span>Compress PDF</span>
             </x-nav-link>
 
-            @if(Auth::user()->hasRole(['Treasury', 'Sales', 'Head']))
+            <!-- Notifications -->
+            <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.*')">
+                <div class="relative shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    @php $unreadCount = Auth::user()->unreadNotificationsCount(); @endphp
+                    @if($unreadCount > 0)
+                        <span class="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white">
+                            {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                        </span>
+                    @endif
+                </div>
+                <span>Notifikasi</span>
+            </x-nav-link>
+
+            @if(Auth::user()->hasRole(['Treasury', 'Headman', 'Marketing', 'Penasehat']))
                 <!-- Treasury & Payroll Hub Accordion Menu (Mobile) -->
                 <div x-data="{ open: {{ request()->routeIs('treasury.*') ? 'true' : 'false' }} }" class="space-y-1">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer {{ request()->routeIs('treasury.*') ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent' }}">
@@ -213,32 +273,43 @@
                     </button>
                     
                     <div x-show="open" x-collapse class="pl-6 space-y-1 mt-1">
-                        @if(Auth::user()->hasRole(['Treasury', 'Head']))
+                        @if(Auth::user()->hasRole(['Treasury', 'Headman']))
                             <a href="{{ route('treasury.dashboard') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.dashboard') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
                                 Dashboard Keuangan
                             </a>
                         @endif
-                        <a href="{{ route('treasury.omset') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.omset') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
-                            Input Omset & Sales
-                        </a>
-                        @if(Auth::user()->hasRole(['Treasury', 'Head']))
+                        @if(Auth::user()->hasRole(['Treasury', 'Marketing', 'Headman']))
+                            <a href="{{ route('treasury.omset') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.omset') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
+                                {{ Auth::user()->hasRole(['Marketing']) ? 'Ajukan Omset' : 'Omset & Persetujuan' }}
+                            </a>
+                        @endif
+                        @if(Auth::user()->hasRole(['Treasury', 'Headman', 'Penasehat']))
                             <a href="{{ route('treasury.payroll') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.payroll') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
                                 Evaluasi KPI & Payroll
+                            </a>
+                            <a href="{{ route('treasury.cashbook') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.cashbook') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
+                                Buku Kas Besar
                             </a>
                         @endif
                         <a href="{{ route('treasury.events') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.events') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
                             Pengeluaran Event
                         </a>
-                        @if(Auth::user()->hasRole(['Treasury', 'Head']))
-                            <a href="{{ route('treasury.cashbook') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.cashbook') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
-                                Buku Kas Besar
-                            </a>
+                        @if(Auth::user()->hasRole(['Treasury']))
                             <a href="{{ route('treasury.users') }}" class="block px-4 py-2 rounded-lg text-[11px] font-medium transition {{ request()->routeIs('treasury.users') ? 'text-indigo-400 bg-white/5' : 'text-slate-450 hover:text-white' }}" @click="sidebarOpen = false">
-                                Manajemen Pengguna & Peran
+                                👑 Manajemen Pengguna
                             </a>
                         @endif
                     </div>
                 </div>
+            @endif
+
+            @if(!Auth::user()->hasRole(['Treasury', 'Headman', 'Marketing', 'Penasehat']))
+                <x-nav-link :href="route('treasury.events')" :active="request()->routeIs('treasury.events')">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    <span>Jadwal Event</span>
+                </x-nav-link>
             @endif
         </div>
 
@@ -304,13 +375,27 @@
             <span>Compress PDF</span>
         </a>
 
-        @if(Auth::user()->hasRole(['Treasury', 'Head']))
+        <!-- Notifications -->
+        <a href="{{ route('notifications.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-all">
+            <div class="relative">
+                <svg class="w-4 h-4 text-slate-450" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </div>
+            <span>Notifikasi</span>
+            @php $unreadCount = Auth::user()->unreadNotificationsCount(); @endphp
+            @if($unreadCount > 0)
+                <span class="ml-auto text-[9px] font-black bg-rose-500 text-white px-1.5 py-0.5 rounded-full">{{ $unreadCount }}</span>
+            @endif
+        </a>
+
+        @if(Auth::user()->hasRole(['Treasury']))
             <!-- User Management Link -->
             <a href="{{ route('treasury.users') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-all">
                 <svg class="w-4 h-4 text-slate-450" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493" />
                 </svg>
-                <span>Manajemen Pengguna</span>
+                <span>👑 Manajemen Pengguna</span>
             </a>
         @endif
 
@@ -336,7 +421,15 @@
             <span class="text-[9px]">Beranda</span>
         </a>
 
-        @if(Auth::user()->hasRole(['Treasury', 'Sales', 'Head']))
+        <!-- Workspace Tasks -->
+        <a href="{{ route('projects.index') }}" class="flex flex-col items-center gap-1 transition-all {{ request()->routeIs('projects.*') ? 'text-indigo-400 font-bold scale-105' : 'text-slate-400 hover:text-white' }}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+            <span class="text-[9px]">Workspace</span>
+        </a>
+
+        @if(Auth::user()->hasRole(['Treasury', 'Headman', 'Marketing']))
             <!-- Omset Link -->
             <a href="{{ route('treasury.omset') }}" class="flex flex-col items-center gap-1 transition-all {{ request()->routeIs('treasury.omset') ? 'text-indigo-400 font-bold scale-105' : 'text-slate-400 hover:text-white' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -344,35 +437,23 @@
                 </svg>
                 <span class="text-[9px]">Omset</span>
             </a>
-
-            @if(Auth::user()->hasRole(['Treasury', 'Head']))
-                <!-- Payroll Link -->
-                <a href="{{ route('treasury.payroll') }}" class="flex flex-col items-center gap-1 transition-all {{ request()->routeIs('treasury.payroll') ? 'text-indigo-400 font-bold scale-105' : 'text-slate-400 hover:text-white' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 01-7.5 0M4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                    <span class="text-[9px]">Payroll</span>
-                </a>
-            @endif
-
-            <!-- Events Link -->
-            <a href="{{ route('treasury.events') }}" class="flex flex-col items-center gap-1 transition-all {{ request()->routeIs('treasury.events') ? 'text-indigo-400 font-bold scale-105' : 'text-slate-400 hover:text-white' }}">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                </svg>
-                <span class="text-[9px]">Event</span>
-            </a>
-            
-            @if(Auth::user()->hasRole(['Treasury', 'Head']))
-                <!-- Cashbook Link -->
-                <a href="{{ route('treasury.cashbook') }}" class="flex flex-col items-center gap-1 transition-all {{ request()->routeIs('treasury.cashbook') ? 'text-indigo-400 font-bold scale-105' : 'text-slate-400 hover:text-white' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
-                    </svg>
-                    <span class="text-[9px]">Kas</span>
-                </a>
-            @endif
         @endif
+
+        <!-- Notifications Bell -->
+        <a href="{{ route('notifications.index') }}" class="flex flex-col items-center gap-1 transition-all {{ request()->routeIs('notifications.*') ? 'text-indigo-400 font-bold scale-105' : 'text-slate-400 hover:text-white' }} relative">
+            <div class="relative">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                @php $unreadCount = Auth::user()->unreadNotificationsCount(); @endphp
+                @if($unreadCount > 0)
+                    <span class="absolute -top-1 -right-1 w-3.5 h-3.5 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-black text-white">
+                        {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                    </span>
+                @endif
+            </div>
+            <span class="text-[9px]">Notif</span>
+        </a>
 
         <!-- Toggle Button for Pop-up Menu -->
         <button @click="showMenu = !showMenu" class="flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-white cursor-pointer" :class="showMenu ? 'text-indigo-400 scale-110' : ''">

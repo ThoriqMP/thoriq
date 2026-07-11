@@ -6,6 +6,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PdfCompressController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -14,14 +15,22 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Projects
+    // Projects — accessible to all roles (workspace)
     Route::resource('projects', ProjectController::class);
 
-    // Tasks
+    // Tasks — all roles can create/update/view tasks
     Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::put('tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     Route::patch('tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
+
+    // Task Assignment — all roles can assign tasks to team members
+    Route::post('tasks/{task}/assign', [TaskController::class, 'assign'])->name('tasks.assign');
+    Route::delete('tasks/{task}/unassign/{user}', [TaskController::class, 'unassign'])->name('tasks.unassign');
+
+    // Task Comments — all roles can comment on tasks
+    Route::post('tasks/{task}/comments', [TaskController::class, 'comment'])->name('tasks.comments.store');
+    Route::delete('task-comments/{comment}', [TaskController::class, 'destroyComment'])->name('tasks.comments.destroy');
 
     // Documents
     Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
@@ -38,6 +47,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
 
     // Treasury & Payroll Hub
     Route::prefix('treasury')->name('treasury.')->group(function () {
@@ -66,3 +80,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+

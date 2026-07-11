@@ -132,6 +132,16 @@
             </div>
         @endif
 
+        <!-- PWA Install Button (Desktop) -->
+        <button onclick="window.installPWA()" 
+                class="pwa-install-btn w-full items-center justify-center gap-2 py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[11px] font-extrabold shadow-md shadow-indigo-600/10 transition-all cursor-pointer mb-3"
+                style="display: none;">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <span>Unduh Aplikasi</span>
+        </button>
+
         <!-- User Info Row -->
         <div class="flex items-center gap-3 p-1">
             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-md shadow-indigo-500/10">
@@ -317,6 +327,16 @@
             <!-- Category: Account -->
             <div class="space-y-2">
                 <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest px-2 pt-2">Akun</div>
+
+                <!-- PWA Install Button (Mobile) -->
+                <button onclick="window.installPWA()" 
+                        class="pwa-install-btn w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 transition cursor-pointer"
+                        style="display: none;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <span>Unduh Aplikasi</span>
+                </button>
                 
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('profile.edit') ? 'bg-indigo-500/10 text-indigo-400' : 'text-slate-300 hover:text-white' }}">
                     <svg class="w-4 h-4 text-slate-450" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

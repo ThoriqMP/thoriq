@@ -65,6 +65,37 @@
                     };
                 });
             }
+
+            // PWA Install Prompt Handler
+            window.deferredPrompt = null;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                window.deferredPrompt = e;
+                // Show all elements with class 'pwa-install-btn'
+                document.querySelectorAll('.pwa-install-btn').forEach(btn => {
+                    btn.style.display = 'flex';
+                });
+            });
+
+            window.addEventListener('appinstalled', (evt) => {
+                console.log('[PWA] App installed successfully');
+                document.querySelectorAll('.pwa-install-btn').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                window.deferredPrompt = null;
+            });
+
+            window.installPWA = () => {
+                const promptEvent = window.deferredPrompt;
+                if (!promptEvent) return;
+                promptEvent.prompt();
+                promptEvent.userChoice.then((choiceResult) => {
+                    window.deferredPrompt = null;
+                    document.querySelectorAll('.pwa-install-btn').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+                });
+            };
         </script>
     </head>
     <body class="font-sans antialiased bg-slate-950 text-slate-100 min-h-screen relative overflow-x-hidden" x-data="{ sidebarOpen: false }">

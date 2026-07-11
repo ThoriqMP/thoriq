@@ -1,6 +1,6 @@
 {
-    "name": "Thoriq Workspace",
-    "short_name": "ThoriqWS",
+    "name": "Team Psikomapping",
+    "short_name": "Psikomapping",
     "description": "Aplikasi manajemen workspace terpadu - tugas, treasury, payroll, dan pengeluaran event.",
     "start_url": "/dashboard",
     "scope": "/",
@@ -29,7 +29,7 @@
         {
             "name": "Dashboard",
             "short_name": "Beranda",
-            "description": "Buka halaman utama Thoriq Workspace",
+            "description": "Buka halaman utama Team Psikomapping",
             "url": "/dashboard",
             "icons": [{ "src": "/pwa-192.png", "sizes": "192x192" }]
         },

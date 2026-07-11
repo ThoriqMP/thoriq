@@ -1,6 +1,6 @@
-// Thoriq Workspace - Service Worker
+// Team Psikomapping - Service Worker
 // Version: v1.0.0
-const CACHE_NAME = 'thoriq-workspace-v1';
+const CACHE_NAME = 'team-psikomapping-v1';
 
 // Static assets to pre-cache
 const PRECACHE_URLS = [

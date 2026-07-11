@@ -10,7 +10,7 @@
                     </span>
                     Evaluasi KPI & Distribusi Payroll
                 </h2>
-                <p class="text-xs text-slate-400 mt-1">Pembagian 70% Gaji Pokok Secara Rata dan 30% Tukin Berdasarkan Grade KPI (7 SDM)</p>
+                <p class="text-xs text-slate-400 mt-1">Pembagian Gaji Pokok (70%) & Tukin (30%) Berdasarkan 6 Pos Divisi Kerja (Penasehat & Front-man digabung)</p>
             </div>
         </div>
     </x-slot>
@@ -41,18 +41,18 @@
                     <p class="text-lg font-extrabold text-white mt-1">Rp {{ number_format($selectedLog->nominal_omset, 0, ',', '.') }}</p>
                 </div>
                 <div class="bg-indigo-950/20 border border-indigo-500/10 rounded-xl p-4">
-                    <p class="text-[10px] font-bold text-indigo-400 uppercase">Anggaran Payroll (B - 70%)</p>
+                    <p class="text-[10px] font-bold text-indigo-400 uppercase">Anggaran Payroll (B - 60%)</p>
                     <p class="text-lg font-extrabold text-indigo-350 mt-1">Rp {{ number_format($selectedLog->alokasi_gaji, 0, ',', '.') }}</p>
                 </div>
                 <div class="bg-violet-950/20 border border-violet-500/10 rounded-xl p-4">
                     <p class="text-[10px] font-bold text-violet-400 uppercase">Pool Gapok (70% B)</p>
                     <p class="text-lg font-extrabold text-violet-350 mt-1">Rp {{ number_format($selectedLog->gaji_pokok_pool, 0, ',', '.') }}</p>
-                    <p class="text-[9px] text-slate-500 mt-1">Dibagi rata ke 7 SDM (@Rp {{ number_format($selectedLog->gaji_pokok_pool / 7, 0, ',', '.') }})</p>
+                    <p class="text-[9px] text-slate-500 mt-1">Dibagi rata ke 6 Pos Divisi (@Rp {{ number_format($selectedLog->gaji_pokok_pool / 6, 0, ',', '.') }} per pos)</p>
                 </div>
                 <div class="bg-emerald-950/20 border border-emerald-500/10 rounded-xl p-4">
                     <p class="text-[10px] font-bold text-emerald-400 uppercase">Pool Tukin (30% B)</p>
                     <p class="text-lg font-extrabold text-emerald-350 mt-1">Rp {{ number_format($selectedLog->tukin_pool, 0, ',', '.') }}</p>
-                    <p class="text-[9px] text-slate-550 mt-1">Diberikan sesuai Grade KPI wajib</p>
+                    <p class="text-[9px] text-slate-550 mt-1">Dibagi rata ke 6 Pos Divisi berdasarkan Grade KPI</p>
                 </div>
             </div>
 
@@ -69,7 +69,7 @@
                         @endphp
                         @if($anyPending)
                             <button type="button" @click="formToSubmit = 'form-pay-all'; showConfirmModal = true" class="px-5 py-2.5 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/15 cursor-pointer">
-                                Kirim / Bayar Gaji (7 SDM)
+                                Kirim / Bayar Gaji
                             </button>
                             <form id="form-pay-all" action="{{ route('treasury.payroll.bayar', $selectedLog->id) }}" method="POST" class="hidden">
                                 @csrf

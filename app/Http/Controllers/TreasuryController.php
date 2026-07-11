@@ -74,31 +74,53 @@ class TreasuryController extends Controller
         $request->validate([
             'tanggal' => 'required|date',
             'nominal_omset' => 'required|numeric|min:0',
+            'tahun' => 'required|integer|min:1|max:3',
             'sales_id' => 'required|exists:users,id',
         ]);
 
         $omset = $request->input('nominal_omset');
+        $tahun = $request->input('tahun');
 
-        // Formula:
-        // B (Anggaran Penggajian) = 70% dari A.
-        // C (Kas Perusahaan) = 30% dari A.
-        $alokasiGaji = $omset * 0.70;
-        $alokasiPerusahaan = $omset * 0.30;
+        // New Formula:
+        // B (Anggaran Penggajian) = 60% dari A.
+        // C (Kas Perusahaan) = 40% dari A.
+        $alokasiGaji = $omset * 0.60;
+        $alokasiPerusahaan = $omset * 0.40;
 
-        // D (Total Gaji Pokok Pool) = 70% dari B.
-        // E (Total Tukin Pool) = 30% dari B.
+        // Sub-allocations of C (40%) based on Year
+        if ($tahun == 1) {
+            $alokasiDevelopment = $omset * 0.30;
+            $alokasiPartnership = $omset * 0.10;
+        } elseif ($tahun == 2) {
+            $alokasiDevelopment = $omset * 0.20;
+            $alokasiPartnership = $omset * 0.20;
+        } else {
+            $alokasiDevelopment = $omset * 0.10;
+            $alokasiPartnership = $omset * 0.30;
+        }
+
+        // Sub-allocations of Partnership (Bagi Hasil)
+        $alokasiPenasehat = $alokasiPartnership * 0.50;
+        $alokasiSaham = $alokasiPartnership * 0.50;
+
+        // Keep Gapok and Tukin pools for legacy view compatibility (70% and 30% of Gaji)
         $gapokPool = $alokasiGaji * 0.70;
         $tukinPool = $alokasiGaji * 0.30;
 
         // Auto approve if entered by Treasury, else wait for Treasury/Headman approval
         $status = (Auth::user()->role && Auth::user()->role->name === 'Treasury') ? 'approved' : 'pending';
 
-        \DB::transaction(function () use ($request, $omset, $alokasiGaji, $alokasiPerusahaan, $gapokPool, $tukinPool, $status) {
+        \DB::transaction(function () use ($request, $omset, $tahun, $alokasiGaji, $alokasiPerusahaan, $alokasiDevelopment, $alokasiPartnership, $alokasiPenasehat, $alokasiSaham, $gapokPool, $tukinPool, $status) {
             $log = OmsetLog::create([
                 'tanggal' => $request->tanggal,
                 'nominal_omset' => $omset,
+                'tahun' => $tahun,
                 'alokasi_gaji' => $alokasiGaji,
                 'alokasi_perusahaan' => $alokasiPerusahaan,
+                'alokasi_development' => $alokasiDevelopment,
+                'alokasi_partnership' => $alokasiPartnership,
+                'alokasi_penasehat' => $alokasiPenasehat,
+                'alokasi_saham' => $alokasiSaham,
                 'gaji_pokok_pool' => $gapokPool,
                 'tukin_pool' => $tukinPool,
                 'sales_id' => $request->sales_id,
@@ -111,10 +133,10 @@ class TreasuryController extends Controller
                     'tipe' => 'in',
                     'kategori' => 'omset',
                     'nominal' => $omset,
-                    'deskripsi' => "Omset Masuk - Alokasi Perusahaan (Rp " . number_format($alokasiPerusahaan, 0, ',', '.') . ") & Alokasi Gaji (Rp " . number_format($alokasiGaji, 0, ',', '.') . ")",
+                    'deskripsi' => "Omset Masuk - Gaji (Rp " . number_format($alokasiGaji, 0, ',', '.') . "), Dev (Rp " . number_format($alokasiDevelopment, 0, ',', '.') . "), Penasehat (Rp " . number_format($alokasiPenasehat, 0, ',', '.') . "), Saham (Rp " . number_format($alokasiSaham, 0, ',', '.') . ")",
                 ]);
 
-                // Auto-generate payroll distributions draft for the 7 users
+                // Auto-generate payroll distributions draft for the users
                 $this->generatePayrollDistributions($log);
             }
         });
@@ -207,18 +229,32 @@ class TreasuryController extends Controller
 
     private function generatePayrollDistributions(OmsetLog $log)
     {
-        $users = User::all(); // 7 users
-        $totalUsers = $users->count();
-
-        // Gaji Pokok Pool divided equally among all 7 users
-        $gapokPerSdm = $totalUsers > 0 ? ($log->gaji_pokok_pool / $totalUsers) : 0;
+        $users = User::with('role')->get();
 
         foreach ($users as $user) {
+            $roleName = $user->role?->name;
+            if (!$roleName) continue;
+
+            // Determine user group count (6 groups total)
+            if (in_array($roleName, ['Penasehat', 'Front-man Officer'])) {
+                $groupCount = User::whereHas('role', function($q) {
+                    $q->whereIn('name', ['Penasehat', 'Front-man Officer']);
+                })->count() ?: 1;
+            } else {
+                $groupCount = User::whereHas('role', function($q) use ($roleName) {
+                    $q->where('name', $roleName);
+                })->count() ?: 1;
+            }
+
+            // Gaji Pokok Pool divided equally into 6 shares, then split among group users
+            $groupGapokShare = $log->gaji_pokok_pool / 6;
+            $gapokPerUser = $groupGapokShare / $groupCount;
+
             PayrollDistribution::create([
                 'omset_log_id' => $log->id,
                 'user_id' => $user->id,
                 'kpi_grade_id' => null, // Treasury will fill KPI later
-                'nominal_gapok_diterima' => $gapokPerSdm,
+                'nominal_gapok_diterima' => $gapokPerUser,
                 'nominal_tukin_diterima' => 0,
                 'status_pembayaran' => 'pending',
             ]);
@@ -256,10 +292,25 @@ class TreasuryController extends Controller
         $log = $distribution->omsetLog;
         $grade = KpiGrade::find($request->kpi_grade_id);
 
-        // Tukin calculation based on KPI Grade percentage
+        // Tukin calculation based on KPI Grade percentage and group count
         $tukin = 0;
         if ($grade) {
-            $tukin = ($grade->weight_percentage / 100) * $log->tukin_pool;
+            $user = $distribution->user;
+            $roleName = $user->role?->name;
+
+            if (in_array($roleName, ['Penasehat', 'Front-man Officer'])) {
+                $groupCount = User::whereHas('role', function($q) {
+                    $q->whereIn('name', ['Penasehat', 'Front-man Officer']);
+                })->count() ?: 1;
+            } else {
+                $groupCount = User::whereHas('role', function($q) use ($roleName) {
+                    $q->where('name', $roleName);
+                })->count() ?: 1;
+            }
+
+            // Tukin Pool divided equally into 6 shares, then split among group users based on KPI grade
+            $groupTukinShare = $log->tukin_pool / 6;
+            $tukin = ($grade->weight_percentage / 100) * ($groupTukinShare / $groupCount);
         }
 
         $distribution->update([

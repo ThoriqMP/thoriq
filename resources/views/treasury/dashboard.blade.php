@@ -47,20 +47,21 @@
             <div class="relative overflow-hidden bg-slate-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pool Gaji Pokok (70% B)</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Pool Gaji/SDM (60%)</span>
                     <span class="p-2 bg-violet-500/10 rounded-lg text-violet-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A2.25 2.25 0 0112.75 21.5h-1.5a2.25 2.25 0 01-2.25-2.263V19.13m4.13-3.07c-.6-.2-1.24-.31-1.92-.31s-1.32.11-1.92.31m0 0a9.01 9.01 0 00-2.625.372 9.042 9.042 0 00-4.12.952 4.125 4.125 0 007.533 2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A2.25 2.25 0 0112.75 21.5h-1.5a2.25 2.25 0 01-2.25-2.263V19.13m4.13-3.07c-.6-.2-1.24-.31-1.92-.31s-1.32.11-1.92.31m0 0a9.01 9.01 0 00-2.625.372 9.042 9.042 0 00-4.12.952 4.125 4.125 0 007.533 2.493" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493" />
                         </svg>
                     </span>
                 </div>
                 <div class="mt-4">
                     <span class="text-3xl font-extrabold text-white tracking-tight">
-                        Rp {{ number_format($totalGapokPool, 0, ',', '.') }}
+                        Rp {{ number_format($totalB, 0, ',', '.') }}
                     </span>
                 </div>
                 <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-white/5 pt-3">
-                    <span>Pool Tukin (30% B): Rp {{ number_format($totalTukinPool, 0, ',', '.') }}</span>
+                    <span>Gapok Pool (70%): Rp {{ number_format($totalGapokPool, 0, ',', '.') }}</span>
+                    <span>Tukin Pool (30%): Rp {{ number_format($totalTukinPool, 0, ',', '.') }}</span>
                 </div>
             </div>
 
@@ -82,7 +83,7 @@
                 </div>
                 <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-white/5 pt-3">
                     <span class="text-amber-400 font-semibold">Tertunda (Pending)</span>
-                    <span class="text-emerald-400">Terbayar: Rp {{ number_format($payrollPaid, 0, ',', '.') }}</span>
+                    <span class="text-emerald-400 font-semibold">Terbayar: Rp {{ number_format($payrollPaid, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
@@ -91,29 +92,35 @@
         <div class="bg-slate-900/20 border border-white/5 rounded-2xl p-6">
             <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Rumus Otomatisasi Pembagian Omset</h3>
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
-                <div class="bg-slate-950 p-4 rounded-xl border border-white/5">
+                <div class="bg-slate-950 p-4 rounded-xl border border-white/5 flex flex-col justify-center">
                     <div class="text-[10px] font-bold text-slate-500 uppercase">A (Omset Utama)</div>
                     <div class="text-base font-extrabold text-white mt-1">100%</div>
                 </div>
-                <div class="flex items-center justify-center text-slate-650">
+                <div class="flex items-center justify-center text-slate-600">
                     <svg class="w-6 h-6 rotate-90 md:rotate-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
                 </div>
-                <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-500/20">
-                    <div class="text-[10px] font-bold text-indigo-400 uppercase">B (Anggaran Penggajian)</div>
-                    <div class="text-base font-extrabold text-indigo-300 mt-1">70% dari A</div>
-                    <div class="text-[10px] text-slate-400 mt-2">D (Gapok 70%) & E (Tukin 30%)</div>
+                <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-500/20 text-left space-y-1">
+                    <div class="text-[10px] font-bold text-indigo-400 uppercase text-center">B (Gaji/SDM - 60%)</div>
+                    <div class="text-xs text-slate-300 font-medium">Bagi rata ke 6 Pos:</div>
+                    <div class="text-[10px] text-slate-400 leading-relaxed">• 10% per Pos Divisi<br>• Pos ke-6: Penasehat & Front-man gabung</div>
                 </div>
-                <div class="flex items-center justify-center text-slate-650">
+                <div class="flex items-center justify-center text-slate-600">
                     <svg class="w-6 h-6 rotate-90 md:rotate-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
                 </div>
-                <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/20">
-                    <div class="text-[10px] font-bold text-emerald-400 uppercase">C (Kas Perusahaan)</div>
-                    <div class="text-base font-extrabold text-emerald-300 mt-1">30% dari A</div>
-                    <div class="text-[10px] text-slate-400 mt-2">Masuk ke kas otomatis</div>
+                <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/20 text-left space-y-1">
+                    <div class="text-[10px] font-bold text-emerald-400 uppercase text-center">C (Kas & Dev - 40%)</div>
+                    <div class="text-[10px] text-slate-300 leading-relaxed">
+                        • **Th 1**: Dev 30% / Hasil 10%<br>
+                        • **Th 2**: Dev 20% / Hasil 20%<br>
+                        • **Th 3**: Dev 10% / Hasil 30%<br>
+                        <strong>Bagi Hasil (Hasil):</strong><br>
+                        - 50% Penasehat (Ambo)<br>
+                        - 50% Saham (5 Org)
+                    </div>
                 </div>
             </div>
         </div>

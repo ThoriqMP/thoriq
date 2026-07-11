@@ -40,7 +40,7 @@
                         <tr class="border-b border-white/5 bg-slate-950/40 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                             <th class="p-4">Tanggal</th>
                             <th class="p-4">Omset (A)</th>
-                            <th class="p-4">Pembagian B / C</th>
+                            <th class="p-4">Rincian Alokasi Dana (B & C)</th>
                             <th class="p-4">Sales PIC</th>
                             <th class="p-4">Status</th>
                             <th class="p-4 text-center">Aksi</th>
@@ -52,8 +52,16 @@
                                 <td class="p-4 text-slate-300 font-semibold">{{ \Carbon\Carbon::parse($log->tanggal)->format('d M Y') }}</td>
                                 <td class="p-4 text-white font-extrabold">Rp {{ number_format($log->nominal_omset, 0, ',', '.') }}</td>
                                 <td class="p-4 text-slate-450 space-y-1">
-                                    <div>Gaji: Rp {{ number_format($log->alokasi_gaji, 0, ',', '.') }}</div>
-                                    <div>Kas: Rp {{ number_format($log->alokasi_perusahaan, 0, ',', '.') }}</div>
+                                    <div class="font-bold text-slate-300">Gaji (60%): Rp {{ number_format($log->alokasi_gaji, 0, ',', '.') }}</div>
+                                    <div class="font-bold text-slate-300">Kas & Dev (40%): Rp {{ number_format($log->alokasi_perusahaan, 0, ',', '.') }} <span class="text-[9px] text-indigo-400 font-extrabold bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 ml-1">Tahun {{ $log->tahun }}</span></div>
+                                    <div class="pl-3 border-l border-white/10 space-y-0.5 text-[10px] text-slate-400">
+                                        <div>• Dana Dev: Rp {{ number_format($log->alokasi_development, 0, ',', '.') }}</div>
+                                        <div>• Bagi Hasil: Rp {{ number_format($log->alokasi_partnership, 0, ',', '.') }}</div>
+                                        <div class="pl-2 border-l border-white/5 space-y-0.5 text-slate-500 text-[9px]">
+                                            <div>- Penasehat (Ambo 50%): Rp {{ number_format($log->alokasi_penasehat, 0, ',', '.') }}</div>
+                                            <div>- Saham (5 Orang 50%): Rp {{ number_format($log->alokasi_saham, 0, ',', '.') }} <span class="text-[8px] text-slate-600">(Rp {{ number_format($log->alokasi_saham / 5, 0, ',', '.') }}/org)</span></div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="p-4 text-slate-350">{{ $log->sales->name }}</td>
                                 <td class="p-4">
@@ -102,11 +110,19 @@
                                 </div>
                                 <h4 class="text-xs font-extrabold text-white">Rp {{ number_format($log->nominal_omset, 0, ',', '.') }}</h4>
                                 
-                                <div class="text-[10px] text-slate-450 space-y-0.5 mt-2 pt-2 border-t border-white/5">
-                                    <div>Gaji: Rp {{ number_format($log->alokasi_gaji, 0, ',', '.') }}</div>
-                                    <div>Kas: Rp {{ number_format($log->alokasi_perusahaan, 0, ',', '.') }}</div>
+                                <div class="text-[10px] text-slate-450 space-y-1 mt-2 pt-2 border-t border-white/5">
+                                    <div class="font-bold">Gaji (60%): Rp {{ number_format($log->alokasi_gaji, 0, ',', '.') }}</div>
+                                    <div class="font-bold">Kas (40%): Rp {{ number_format($log->alokasi_perusahaan, 0, ',', '.') }} (Th-{{ $log->tahun }})</div>
+                                    <div class="text-[9px] text-slate-500 pl-2 border-l border-white/5 space-y-0.5">
+                                        <div>Dev: Rp {{ number_format($log->alokasi_development, 0, ',', '.') }}</div>
+                                        <div>Hasil: Rp {{ number_format($log->alokasi_partnership, 0, ',', '.') }}</div>
+                                        <div class="text-[8px] text-slate-600 pl-1">
+                                            <div>Ambo: Rp {{ number_format($log->alokasi_penasehat, 0, ',', '.') }}</div>
+                                            <div>Mitra: Rp {{ number_format($log->alokasi_saham, 0, ',', '.') }}</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-[10px] text-slate-500 mt-1 truncate">PIC: {{ $log->sales->name }}</div>
+                                <div class="text-[9px] text-slate-550 mt-1 truncate">PIC: {{ $log->sales->name }}</div>
                             </div>
 
                             <div class="flex gap-2 w-full">
@@ -155,15 +171,36 @@
 
             <form action="{{ route('treasury.omset.store') }}" method="POST" class="space-y-4" x-data="{ 
                 omset: 0, 
-                get alokasiGaji() { return this.omset * 0.70 },
-                get alokasiPerusahaan() { return this.omset * 0.30 },
-                get gapokPool() { return this.alokasiGaji * 0.70 },
-                get tukinPool() { return this.alokasiGaji * 0.30 }
+                tahun: 1,
+                get alokasiGaji() { return this.omset * 0.60 },
+                get alokasiPerusahaan() { return this.omset * 0.40 },
+                get alokasiDevelopment() { 
+                    if (this.tahun == 1) return this.omset * 0.30;
+                    if (this.tahun == 2) return this.omset * 0.20;
+                    return this.omset * 0.10;
+                },
+                get alokasiPartnership() { 
+                    if (this.tahun == 1) return this.omset * 0.10;
+                    if (this.tahun == 2) return this.omset * 0.20;
+                    return this.omset * 0.30;
+                },
+                get alokasiPenasehat() { return this.alokasiPartnership * 0.50 },
+                get alokasiSaham() { return this.alokasiPartnership * 0.50 },
+                get perSaham() { return this.alokasiSaham / 5 }
             }">
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-slate-450 uppercase mb-2">Tanggal Transaksi</label>
                     <input type="date" name="tanggal" required value="{{ date('Y-m-d') }}" class="w-full bg-slate-950 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-450 uppercase mb-2">Tahun Buku / Operasional</label>
+                    <select name="tahun" x-model="tahun" class="w-full bg-slate-950 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <option value="1">Tahun 1 (Dev 30% / Partnership 10%)</option>
+                        <option value="2">Tahun 2 (Dev 20% / Partnership 20%)</option>
+                        <option value="3">Tahun 3 (Dev 10% / Partnership 30%)</option>
+                    </select>
                 </div>
 
                 <div x-data="{
@@ -213,20 +250,34 @@
                 <div x-show="omset > 0" class="bg-indigo-950/20 border border-indigo-500/10 rounded-xl p-4 space-y-2 text-xs" style="display: none;">
                     <h4 class="font-bold text-indigo-400 uppercase tracking-wider mb-2 text-[10px]">Live Preview Alokasi</h4>
                     <div class="flex justify-between text-slate-300">
-                        <span>Anggaran Gaji (B - 70%):</span>
+                        <span>Anggaran Gaji/SDM (60%):</span>
                         <span class="font-bold text-white">Rp <span x-text="new Intl.NumberFormat('id-ID').format(alokasiGaji)"></span></span>
                     </div>
                     <div class="flex justify-between text-slate-300">
-                        <span>Kas Perusahaan (C - 30%):</span>
+                        <span>Kas & Dev Pool (40%):</span>
                         <span class="font-bold text-white">Rp <span x-text="new Intl.NumberFormat('id-ID').format(alokasiPerusahaan)"></span></span>
                     </div>
                     <div class="border-t border-white/5 my-2 pt-2 flex justify-between text-slate-400">
-                        <span>Gaji Pokok Pool (70% B):</span>
-                        <span>Rp <span x-text="new Intl.NumberFormat('id-ID').format(gapokPool)"></span></span>
+                        <span>Dana Development:</span>
+                        <span>Rp <span x-text="new Intl.NumberFormat('id-ID').format(alokasiDevelopment)"></span></span>
                     </div>
                     <div class="flex justify-between text-slate-400">
-                        <span>Tukin Pool (30% B):</span>
-                        <span>Rp <span x-text="new Intl.NumberFormat('id-ID').format(tukinPool)"></span></span>
+                        <span>Bagi Hasil (Partnership):</span>
+                        <span>Rp <span x-text="new Intl.NumberFormat('id-ID').format(alokasiPartnership)"></span></span>
+                    </div>
+                    <div class="pl-3 border-l border-white/5 flex flex-col space-y-1 text-slate-500 text-[11px]">
+                        <div class="flex justify-between">
+                            <span>- Penasehat (Ambo 50%):</span>
+                            <span>Rp <span x-text="new Intl.NumberFormat('id-ID').format(alokasiPenasehat)"></span></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>- Saham (5 Orang 50%):</span>
+                            <span>Rp <span x-text="new Intl.NumberFormat('id-ID').format(alokasiSaham)"></span></span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-600 pl-2">
+                            <span>* Per Orang (10%):</span>
+                            <span>Rp <span x-text="new Intl.NumberFormat('id-ID').format(perSaham)"></span></span>
+                        </div>
                     </div>
                 </div>
 

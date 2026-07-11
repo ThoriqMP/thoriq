@@ -11,8 +11,13 @@ class OmsetLog extends Model
     protected $fillable = [
         'tanggal',
         'nominal_omset',
+        'tahun',
         'alokasi_gaji',
         'alokasi_perusahaan',
+        'alokasi_development',
+        'alokasi_partnership',
+        'alokasi_penasehat',
+        'alokasi_saham',
         'gaji_pokok_pool',
         'tukin_pool',
         'sales_id',

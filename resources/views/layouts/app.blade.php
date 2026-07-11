@@ -123,13 +123,6 @@
                         </div>
                         <span class="text-sm font-bold tracking-tight text-white">Team Psikomapping</span>
                     </a>
-                    
-                    <!-- Menu Toggle -->
-                    <button @click="sidebarOpen = true" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
                 </header>
 
                 <!-- Page Header (Dashboard/Project Breadcrumbs/Title) -->

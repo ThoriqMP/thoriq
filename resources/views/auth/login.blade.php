@@ -7,6 +7,9 @@
 
         <title>{{ config('app.name', 'Team Psikomapping') }} - Masuk</title>
 
+        <link rel="icon" type="image/png" href="/Logo.png">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

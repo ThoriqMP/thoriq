@@ -15,6 +15,8 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Psikomapping">
         <link rel="apple-touch-icon" href="/pwa-apple-touch.png">
+        <link rel="icon" type="image/png" href="/Logo.png">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

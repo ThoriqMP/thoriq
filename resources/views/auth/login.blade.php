@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'TaskVault') }} - Masuk</title>
+        <title>{{ config('app.name', 'Team Psikomapping') }} - Masuk</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,15 +62,11 @@
 
                 <!-- Top section: Logo and Title -->
                 <div class="relative z-10 flex items-center gap-3">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-lg shadow-indigo-500/20">
-                        <!-- Custom TaskVault SVG Logo -->
-                        <svg class="h-full w-full text-white" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M24 6L8 13.5v11.5c0 10.5 7.5 20.3 16 23 8.5-2.7 16-12.5 16-23V13.5L24 6z" fill="white" fill-opacity="0.1" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-                            <path d="M17 24l5 5 9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl overflow-hidden shadow-lg shadow-indigo-500/20 shrink-0">
+                        <img src="/Logo.png" alt="Logo" class="h-full w-full object-cover">
                     </div>
                     <span class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent">
-                        TaskVault
+                        Team Psikomapping
                     </span>
                 </div>
 
@@ -154,7 +150,7 @@
                         Kelola proyek Anda, selesaikan tugas menggunakan Kanban Board interaktif, dan simpan seluruh berkas kerja Anda secara aman.
                     </p>
                     <p class="text-xs text-slate-600 pt-4">
-                        &copy; 2026 TaskVault. All rights reserved.
+                        &copy; 2026 Team Psikomapping. All rights reserved.
                     </p>
                 </div>
             </div>
@@ -176,13 +172,10 @@
                         <div class="space-y-2">
                             <!-- Mini brand logo for mobile display -->
                             <div class="flex lg:hidden items-center gap-2.5 mb-6">
-                                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-md">
-                                    <svg class="h-full w-full text-white" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M24 6L8 13.5v11.5c0 10.5 7.5 20.3 16 23 8.5-2.7 16-12.5 16-23V13.5L24 6z" fill="white" fill-opacity="0.1" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-                                        <path d="M17 24l5 5 9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
+                                <div class="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden shadow-md shrink-0">
+                                    <img src="/Logo.png" alt="Logo" class="h-full w-full object-cover">
                                 </div>
-                                <span class="text-xl font-bold tracking-tight text-white">TaskVault</span>
+                                <span class="text-xl font-bold tracking-tight text-white">Team Psikomapping</span>
                             </div>
                             <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">Selamat Datang</h2>
                             <p class="text-sm text-slate-400">Silakan masuk dengan akun Anda untuk mengakses ruang kerja.</p>
@@ -300,7 +293,7 @@
                                     type="submit" 
                                     class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/10 hover:shadow-indigo-500/20 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-950 transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer"
                                 >
-                                    <span>Masuk ke TaskVault</span>
+                                    <span>Masuk ke Team Psikomapping</span>
                                     <!-- Arrow Right icon -->
                                     <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
